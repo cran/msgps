@@ -10,8 +10,8 @@
 
 //////////////////////////////////////////////////
 //BLAS: y := alpha*A*x + beta*y
-long int gl_incx = 1;
-long int gl_incy = 1;
+int gl_incx = 1;
+int gl_incy = 1;
 double alphaOne = 1.0;
 double alphaminusOne = -1.0;
 double betaOne = 1.0;
@@ -22,33 +22,33 @@ char TRANST = 'T';
 char UPPER = 'U';
 
 
-void _dgemv(long int m, long int n, double *A, long int lda, double *x, double *ans){
-	dgemv_(&TRANSN, &m, &n, &alphaOne, A, &lda, x, &gl_incx, &betaOne, ans, &gl_incy);
-}
+//void _dgemv(int m, int n, double *A, int lda, double *x, double *ans){
+//	dgemv_(&TRANSN, &m, &n, &alphaOne, A, &lda, x, &gl_incx, &betaOne, ans, &gl_incy);
+//}
 
-SEXP Rdgemv01(SEXP ex_A, SEXP ex_x, SEXP ex_y)
-{
-	SEXP ans;
-	int m = INTEGER(GET_DIM(ex_A))[0];
-	int n = INTEGER(GET_DIM(ex_A))[1];
-	double *A;
-	double *x;
-	double *y;
-	int lda = m;
-	long int i;
-	
-	A = REAL(ex_A);
-	x = REAL(ex_x);
-	y = REAL(ex_y);
-	PROTECT(ans = allocVector(REALSXP, m));
-	for( i=0; i<m; i++){
-		REAL(ans)[i] = y[i];
-	}
-	//dgemv_(&TRANSN, &m, &n, &alphaOne, A, &lda, x, &gl_incx, &betaOne, REAL(ans), &gl_incy);
-	_dgemv(m, n, A, lda, x, REAL(ans));
-	UNPROTECT(1);
-	return(ans);
-}
+//SEXP Rdgemv01(SEXP ex_A, SEXP ex_x, SEXP ex_y)
+//{
+//	SEXP ans;
+//	int m = INTEGER(GET_DIM(ex_A))[0];
+//	int n = INTEGER(GET_DIM(ex_A))[1];
+//	double *A;
+//	double *x;
+//	double *y;
+//	int lda = m;
+//	int i;
+//	
+//	A = REAL(ex_A);
+//	x = REAL(ex_x);
+//	y = REAL(ex_y);
+//	PROTECT(ans = allocVector(REALSXP, m));
+//	for( i=0; i<m; i++){
+//		REAL(ans)[i] = y[i];
+//	}
+//	//dgemv_(&TRANSN, &m, &n, &alphaOne, A, &lda, x, &gl_incx, &betaOne, REAL(ans), &gl_incy);
+//	_dgemv(m, n, A, lda, x, REAL(ans));
+//	UNPROTECT(1);
+//	return(ans);
+//}
 
 
 
@@ -57,27 +57,28 @@ SEXP Rdgemv01(SEXP ex_A, SEXP ex_x, SEXP ex_y)
 // 出力：係数の推定値行列(betahat_matrix)，自由度ベクトル（df_zou）
 SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_para, SEXP ex_STEP, SEXP ex_pmax, SEXP ex_weight,SEXP ex_standardize_vec)
 {
-	long int p = INTEGER(GET_DIM(ex_X))[1];
-	long int N = INTEGER(GET_DIM(ex_X))[0];
-	long int NN =N*N;
-	long int STEP = INTEGER(ex_STEP)[0];
-	long int i,i1,j, step0;
+	int p = INTEGER(GET_DIM(ex_X))[1];
+	int N = INTEGER(GET_DIM(ex_X))[0];
+//	int NN =N*N;
+	int STEP = INTEGER(ex_STEP)[0];
+//	int i,i1,j, step0;
+	int i,step0;
 	int one=1;
 	int flag_St;
 	int flag_XTxjstar=0;
-	long int jstar=0;
-	long int jstar0=0;
-	//long int beta_vecminus2_index;
-	long int beta_vecminus2_flag;
-	long int sign_gt_jstar_int;
-	//long int STEP_adj_int;
-	long int jsort;
-	long int pmax=INTEGER(ex_pmax)[0];
-	long int jstar_sort=0;
+	int jstar=0;
+	int jstar0=0;
+	//int beta_vecminus2_index;
+	int beta_vecminus2_flag;
+	int sign_gt_jstar_int;
+	//int STEP_adj_int;
+	int jsort;
+	int pmax=INTEGER(ex_pmax)[0];
+	int jstar_sort=0;
 	
 	int penalty_type_int = INTEGER(ex_penalty_type)[0];
 	int check_int = 20;
-	long int check2_int = 0;
+	int check2_int = 0;
 	
 	
 	double alphaN2 = 2.0 / (double) N;
@@ -113,7 +114,7 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 	SEXP XTXNA_adj;
 	SEXP XTxjstar;
 	SEXP ans;
-	SEXP penalty_type_str;  
+//	SEXP penalty_type_str;  
 	SEXP tuning;  
 	SEXP tuning_stand;  
 	SEXP sum_lambda_t;
@@ -414,29 +415,30 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 // 出力：係数の推定値行列(betahat_matrix)，自由度ベクトル（df_zou）
 SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_para, SEXP ex_STEP,  SEXP ex_pmax, SEXP ex_weight, SEXP ex_X_test, SEXP ex_y_test, SEXP ex_standardize_vec)
 {
-	long int p = INTEGER(GET_DIM(ex_X))[1];
-	long int N = INTEGER(GET_DIM(ex_X))[0];
-	long int Ntest = INTEGER(GET_DIM(ex_X_test))[0];
-	long int NN =N*N;
-	long int NNtest = Ntest*Ntest;
-	long int STEP = INTEGER(ex_STEP)[0];
-	long int i,j, step0;
+	int p = INTEGER(GET_DIM(ex_X))[1];
+	int N = INTEGER(GET_DIM(ex_X))[0];
+	int Ntest = INTEGER(GET_DIM(ex_X_test))[0];
+//	int NN =N*N;
+//	int NNtest = Ntest*Ntest;
+	int STEP = INTEGER(ex_STEP)[0];
+	int i, step0;
+//	int i,j, step0;
 	int one=1;
 	int flag_St;
 	int flag_XTxjstar=0;
-	long int jstar=0;
-	long int jstar0=0;
-	//long int beta_vecminus2_index;
-	long int beta_vecminus2_flag;
-	long int sign_gt_jstar_int;
-	//long int STEP_adj_int;
-	long int jsort;
-	long int pmax=INTEGER(ex_pmax)[0];
-	long int jstar_sort=0;
+	int jstar=0;
+	int jstar0=0;
+	//int beta_vecminus2_index;
+	int beta_vecminus2_flag;
+	int sign_gt_jstar_int;
+	//int STEP_adj_int;
+	int jsort;
+	int pmax=INTEGER(ex_pmax)[0];
+	int jstar_sort=0;
 
 	int penalty_type_int = INTEGER(ex_penalty_type)[0];
 	int check_int = 20;
-	long int check2_int=0;
+	int check2_int=0;
 	
 	double alphaN2 = 2.0 / (double) N;
 	double alphabetaminusN2;
@@ -794,9 +796,9 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 SEXP findtuning(SEXP tuning_kouho, SEXP tuning_eval, SEXP RSSvec)
 {
 	int STEP = LENGTH(tuning_kouho);
-	long int i;
-	long int j;
-	long int j0;
+	int i;
+	int j;
+	int j0;
 	int one=1;
 	SEXP ans;
 	SEXP comparison;
@@ -825,11 +827,11 @@ SEXP findtuning(SEXP tuning_kouho, SEXP tuning_eval, SEXP RSSvec)
 
 SEXP findtuning2(SEXP tuning_candidate, SEXP tuning)
 {
-	long int STEP_candidate = LENGTH(tuning_candidate);
-	long int STEP = LENGTH(tuning);
-	long int i;
-	long int j;
-	long int j0;
+	int STEP_candidate = LENGTH(tuning_candidate);
+	int STEP = LENGTH(tuning);
+	int i;
+	int j;
+	int j0;
 	int one=1;
 	SEXP ans;
 	SEXP comparison;
@@ -865,12 +867,12 @@ SEXP findtuning2(SEXP tuning_candidate, SEXP tuning)
 SEXP DFNAIVE(SEXP ex_X, SEXP ex_y, SEXP ex_betahat_index_vec, SEXP ex_STEP_adj, SEXP ex_increment_vec){
 	
 	
-	long int step0;
-	long int jstar;
-	long int i;
-	long int N=length(ex_y);
-	long int NN=N*N;
-	long int STEP_adj = INTEGER(ex_STEP_adj)[0];
+	int step0;
+	int jstar;
+	int i;
+	int N=length(ex_y);
+	int NN=N*N;
+	int STEP_adj = INTEGER(ex_STEP_adj)[0];
 	int one=1;
 	
 	double increment_covpenalty;
@@ -959,12 +961,12 @@ SEXP DFNAIVE(SEXP ex_X, SEXP ex_y, SEXP ex_betahat_index_vec, SEXP ex_STEP_adj, 
 SEXP DFNAIVE2(SEXP ex_X_selected, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_STEP_adj, SEXP ex_increment_vec){
 	
 	
-	long int step0;
-	long int jstar;
-	long int i;
-	long int N=length(ex_y);
-	long int NN=N*N;
-	long int STEP_adj = INTEGER(ex_STEP_adj)[0];
+	int step0;
+	int jstar;
+	int i;
+	int N=length(ex_y);
+	int NN=N*N;
+	int STEP_adj = INTEGER(ex_STEP_adj)[0];
 	int one=1;
 	
 	double increment_covpenalty;
@@ -1053,14 +1055,14 @@ SEXP DFNAIVE2(SEXP ex_X_selected, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP
 SEXP DFMODIFIED(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_STEP_adj, SEXP ex_increment_vec, SEXP ex_selected_variable_index){
 	
 	
-	long int q_N = INTEGER(GET_DIM(ex_qr_X))[0];
-	long int q_Nq_N = q_N*q_N;
-	long int step0;
-	long int jstar;
-	long int i;
-	//	long int N=length(ex_y);
-	//	long int NN=N*N;
-	long int STEP_adj = INTEGER(ex_STEP_adj)[0];
+	int q_N = INTEGER(GET_DIM(ex_qr_X))[0];
+	int q_Nq_N = q_N*q_N;
+	int step0;
+	int jstar;
+	int i;
+	//	int N=length(ex_y);
+	//	int NN=N*N;
+	int STEP_adj = INTEGER(ex_STEP_adj)[0];
 	int one=1;
 	
 	double increment_covpenalty;
@@ -1169,16 +1171,16 @@ SEXP DFMODIFIED(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_
 SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_STEP_adj, SEXP ex_increment_vec, SEXP ex_selected_variable_index){
 	
 	
-	long int q_N = INTEGER(GET_DIM(ex_qr_X))[0];
-	long int q_Nq_N = q_N*q_N;
-	long int step0;
-	long int jstar;
-	long int i,j;
-	//	long int N=length(ex_y);
-	//	long int NN=N*N;
-	long int STEP_adj = INTEGER(ex_STEP_adj)[0];
+	int q_N = INTEGER(GET_DIM(ex_qr_X))[0];
+	int q_Nq_N = q_N*q_N;
+	int step0;
+	int jstar;
+	int i,j;
+	//	int N=length(ex_y);
+	//	int NN=N*N;
+	int STEP_adj = INTEGER(ex_STEP_adj)[0];
 	int one=1;
-	long int q_N_adj = 0;
+	int q_N_adj = 0;
 	int flag_BtBt0;
 	
 	double increment_covpenalty;
@@ -1307,11 +1309,11 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 SEXP DFMODIFIED3(SEXP ex_betahat_index_vec_adj, SEXP ex_increment_vec, SEXP ex_p_adj, SEXP ex_STEP_adj){
 	
 	
-	long int p_adj = INTEGER(ex_p_adj)[0];
-	long int STEP_adj = INTEGER(ex_STEP_adj)[0];
+	int p_adj = INTEGER(ex_p_adj)[0];
+	int STEP_adj = INTEGER(ex_STEP_adj)[0];
 	
-	long int i;
-	long int j;
+	int i;
+	int j;
 	
     SEXP df0;
     SEXP df_vec;
@@ -1345,14 +1347,14 @@ SEXP DFMODIFIED3(SEXP ex_betahat_index_vec_adj, SEXP ex_increment_vec, SEXP ex_p
 
 
 SEXP betaOUT(SEXP ex_betahat_index_vec, SEXP ex_step, SEXP ex_p, SEXP ex_delta_t, SEXP ex_step_adj, SEXP ex_stepmax){
-	long int p = INTEGER(ex_p)[0];
-	long int n_tuning = length(ex_step);
-	long int stepmax = INTEGER(ex_stepmax)[0];
-	long int i;
-	long int j;
-	long int j1;
-	long int flag_is=0;
-	long int i0;
+	int p = INTEGER(ex_p)[0];
+	int n_tuning = length(ex_step);
+	int stepmax = INTEGER(ex_stepmax)[0];
+	int i;
+	int j;
+	int j1;
+	int flag_is=0;
+	int i0;
 	int sign_int;
 	SEXP beta;
 	SEXP betaMATRIX;
@@ -1403,11 +1405,11 @@ SEXP betaOUT(SEXP ex_betahat_index_vec, SEXP ex_step, SEXP ex_p, SEXP ex_delta_t
 
 
 SEXP betaOUT_MATRIX(SEXP ex_betahat_index_vec, SEXP ex_p, SEXP ex_delta_t){
-	long int STEP=length(ex_betahat_index_vec);
-	long int p = INTEGER(ex_p)[0];
-	long int i;
-	long int j;
-	long int i0;
+	int STEP=length(ex_betahat_index_vec);
+	int p = INTEGER(ex_p)[0];
+	int i;
+	int j;
+	int i0;
 	int sign_int;
 	SEXP beta;
 	SEXP betaMATRIX;
@@ -1452,10 +1454,10 @@ SEXP betaOUT_MATRIX(SEXP ex_betahat_index_vec, SEXP ex_p, SEXP ex_delta_t){
 
 
 SEXP tOUT(SEXP ex_betahat_index_vec, SEXP ex_p, SEXP ex_delta_t){
-	long int STEP=length(ex_betahat_index_vec);
-	long int p = INTEGER(ex_p)[0];
-	long int i;
-	long int i0;
+	int STEP=length(ex_betahat_index_vec);
+	int p = INTEGER(ex_p)[0];
+	int i;
+	int i0;
 	int sign_int;
 	SEXP beta;
 	SEXP tout;

@@ -31,7 +31,7 @@ response vector
 %%     ~~Describe \code{penalty_type} here~~
 The penalty term.  The \code{"enet"} indicates the elastic net:
  \deqn{\alpha/2||\beta||_2^2+(1-\alpha)||\beta||_1.} 
-Note that \code{alpha=1} is the lasso penalty. The \code{"genet"} is the generalized elastic net: 
+Note that \code{alpha=0} is the lasso penalty. The \code{"genet"} is the generalized elastic net: 
  \deqn{log(\alpha+(1-\alpha)||\beta||_1).} 
 The \code{"alasso"} is the adaptive lasso, which is a weighted version of the lasso given by
  \deqn{w_i||\beta||_1,}

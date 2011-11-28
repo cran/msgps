@@ -37,7 +37,7 @@ function(X,y,penalty="enet", alpha=0, gamma=1, lambda=0.001,  tau2, STEP=20000, 
 			if(!is.numeric(tau2))	stop('"tau2" must be a numeric.')
 		    if(length(tau2) > 1)	stop('"tau2" must be a scalar (1-dimensional vector).')
 			if(tau2<0)	stop('"tau2" must be positive.')
-			if(tau2>var(y))	stop('"tau2" must not exceed the variance of y.')
+			if(tau2>var(y)*(length(y)-1))	stop('"tau2" must not exceed the variance of y.')
 		}
 
 	  #check STEP
