@@ -53,6 +53,7 @@ function(X,y,penalty="enet", ex_para=c(0),  STEP=10000, STEP.max=100000, DFtype=
 		meanX <- apply(X,2,mean)
 		meanX_mat <- sweep(X, 2, meanX)
 		standardize_vec <- 1 / sqrt(apply(meanX_mat^2,2,sum))
+		standardize_vec[standardize_vec==Inf] <- 0
 		standardize_mat <- matrix(rep(standardize_vec,nrow(X)),nrow(X),ncol(X),byrow=T)
 		meany <- mean(y)
 
@@ -113,8 +114,8 @@ function(X,y,penalty="enet", ex_para=c(0),  STEP=10000, STEP.max=100000, DFtype=
         
 if(DFtype=="NAIVE"){
          #DFNAIVE
-        dfgps=.Call("DFNAIVE2", ex_X_selected,y,betahat_index_vec_adj,STEP_adj2,increment_covpenalty_vec3)
-		if(sum( abs(dfgps)>1e+10 | is.na(dfgps) | dfgps<0 ) > 1 ) stop("DF is not correct")
+        dfgps_vec=.Call("DFNAIVE2", ex_X_selected,y,betahat_index_vec_adj,STEP_adj2,increment_covpenalty_vec3)
+		if(sum( abs(dfgps_vec)>1e+10 | is.na(dfgps_vec) | dfgps_vec<0 ) > 1 ) stop("DF is not correct")
          
          
 }else if(DFtype=="MODIFIED"){
@@ -122,15 +123,16 @@ if(DFtype=="NAIVE"){
         #QR decomposition
         qr_X <- qr(ex_X_selected)
         qr_X_R <- qr.R(qr_X)
-        #dfgps=.Call("DFMODIFIED", qr_X_R, y, betahat_index_vec_adj, STEP_adj2, increment_covpenalty_vec, selected_variable_index_vec)
-        dfgps=.Call("DFMODIFIED2", qr_X_R, y, betahat_index_vec_adj, STEP_adj2, increment_covpenalty_vec3, selected_variable_index_vec)
-		if(sum( abs(dfgps)>1e+10 | is.na(dfgps) | dfgps<0 ) > 1 ) stop("DF is not correct")
+		qr_X_R[is.nan(qr_X_R)] <- 0
+        #dfgps_vec=.Call("DFMODIFIED", qr_X_R, y, betahat_index_vec_adj, STEP_adj2, increment_covpenalty_vec, selected_variable_index_vec)
+        dfgps_vec=.Call("DFMODIFIED2", qr_X_R, y, betahat_index_vec_adj, STEP_adj2, increment_covpenalty_vec3, selected_variable_index_vec)
+		if(sum( abs(dfgps_vec)>1e+10 | is.na(dfgps_vec) | dfgps_vec<0 ) > 1 ) stop("DF is not correct")
 		}
 
         p<-ncol(X)
         N<-nrow(X)
         if(DFtype=="NAIVE" || DFtype=="MODIFIED" || DFtype=="MODIFIED2"){
-                ans <- list(N=N,p=p,delta_t=delta_t,coefficient_index=betagps_matrix,df=dfgps,STEP_adj=STEP_adj2,RSS=RSS,tuning=tuning,tuning_stand=tuning_stand,X=X0,y=y0,ex_para=ex_para,beta_OLS=beta_OLS,Xstand=X,ystand=y)
+                ans <- list(N=N,p=p,delta_t=delta_t,coefficient_index=betagps_matrix,df=dfgps_vec,STEP_adj=STEP_adj2,RSS=RSS,tuning=tuning,tuning_stand=tuning_stand,X=X0,y=y0,ex_para=ex_para,beta_OLS=beta_OLS,Xstand=X,ystand=y)
                 }else{
                 ans <- list(N=N,p=p,delta_t=delta_t,coefficient_index=betagps_matrix,STEP_adj=STEP_adj2,RSS=RSS,tuning=tuning,tuning_stand=tuning_stand,X=X0,y=y0,ex_para=ex_para,beta_OLS=beta_OLS,Xstand=X,ystand=y)
                 }

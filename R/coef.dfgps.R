@@ -50,6 +50,7 @@ function(object, tuning, intercept=TRUE, stand.coef=FALSE,...){
 				temp <- sqrt(object$N-1) * sqrt(apply(object$X,2,var))
 				temp_mat <- matrix(rep(temp,length(step0)),object$p,length(step0))
 				ans <- ans / temp_mat
+				ans[is.nan(ans)] <- 0
 			}
 			beta00 <- - t(apply(object$X,2,mean)) %*% ans + mean(object$y)
 			if(intercept==TRUE) ans <- rbind(beta00,ans)

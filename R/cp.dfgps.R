@@ -4,6 +4,7 @@ function(dfgps_result,tau2,intercept=TRUE, stand.coef=FALSE){
 		if(intercept!=TRUE && intercept!=FALSE) stop('"intercept" must be TRUE or FALSE')
 				X <- dfgps_result$X
 				X <- scale(X) / sqrt(nrow(X)-1)	
+				X[is.nan(X)] <- 0
 				y <- dfgps_result$y
 				y <- y-mean(y)
 				if(missing(tau2)){
