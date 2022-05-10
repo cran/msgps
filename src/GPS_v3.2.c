@@ -1,11 +1,15 @@
-//Ｒ用 Ｃ
-//#include <stdio.h>
+#define USE_FC_LEN_T
+#include <R.h>
 #include <math.h>
 #include <stdlib.h>
-#include <R.h>
 #include <Rdefines.h>
 #include <R_ext/Parse.h>
 #include <R_ext/BLAS.h>
+//#include <R_ext/Lapack.h>
+
+#ifndef FCONE
+# define FCONE
+#endif
 
 
 //////////////////////////////////////////////////
@@ -221,7 +225,8 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 	
 	
 	//g_tの定義
-	F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one);
+	F77_CALL(dgemv)("T", &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
+	//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	
 	//jstarの初期値
 	jstar=0;
@@ -258,7 +263,8 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		
 		alphabetaminusN2 = -1.0 * alphaN2 * REAL(ex_delta_t)[0] * sign_gt_jstar;
 		if(flag_XTxjstar==1){
-			F77_CALL(dgemv)(&TRANST, &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one);
+			F77_CALL(dgemv)("T", &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one FCONE);
+			//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one FCONE);
 			for( i=0; i<p; i++){			
 				REAL(XTXNA_adj)[i+jstar_sort*p] = REAL(XTxjstar)[i];
 			}
@@ -580,7 +586,8 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 	REAL(RSS_vec_test)[0] = REAL(RSS_vec_test)[0]*REAL(RSS_vec_test)[0];
 	
 	//g_tの定義
-	F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one);
+	//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
+	F77_CALL(dgemv)("T", &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	
 	//jstarの初期値
 	jstar=0;
@@ -621,7 +628,8 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 		//dgemv_(&TRANSN, &N, &p, &alphaminusOne, REAL(ex_X), &N, REAL(beta_vec), &one, &betaOne, REAL(g_t0), &one);
 		alphabetaminusN2 = -1.0 * alphaN2 * REAL(ex_delta_t)[0] * sign_gt_jstar;
 		if(flag_XTxjstar==1){
-			F77_CALL(dgemv)(&TRANST, &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one);
+			//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one FCONE);
+			F77_CALL(dgemv)("T", &N, &p, &alphaOne, REAL(ex_X), &N, REAL(x_jstar), &one, &betaZero, REAL(XTxjstar), &one FCONE);
 			for( i=0; i<p; i++){			
 				REAL(XTXNA_adj)[i+jstar_sort*p] = REAL(XTxjstar)[i];
 			}
@@ -929,7 +937,8 @@ SEXP DFNAIVE(SEXP ex_X, SEXP ex_y, SEXP ex_betahat_index_vec, SEXP ex_STEP_adj, 
 		//		REAL(x_jstar)[i] = REAL(ex_X)[i +jstar*N];
 		//	}
 		// cov * x
-		F77_CALL(dsymv)( &UPPER, &N, &alphaOne, REAL(cov_penalty_matrix),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one);
+		//F77_CALL(dsymv)( &UPPER, &N, &alphaOne, REAL(cov_penalty_matrix),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one FCONE);
+		F77_CALL(dsymv)( "U", &N, &alphaOne, REAL(cov_penalty_matrix),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one FCONE);
 		// xx* cov
 		F77_CALL(dger)(&N, &N,  &increment_covpenalty_minus, REAL(x_jstar), &one,  REAL(x_cov_vec), &one, REAL(xx_cov_matrix), &N);
 		// xx* (I-cov)
@@ -1028,7 +1037,8 @@ SEXP DFNAIVE2(SEXP ex_X_selected, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP
 		//	}
 		// cov * x
 		//			  F77_CALL(dsymv)( &UPPER, &N, &alphaOne, REAL(Bt),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one);
-		F77_CALL(dgemv)( &TRANST, &N,&N, &alphaOne, REAL(Bt),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one);
+		//F77_CALL(dgemv)( &TRANST, &N,&N, &alphaOne, REAL(Bt),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one FCONE);
+		F77_CALL(dgemv)( "T", &N,&N, &alphaOne, REAL(Bt),  &N, REAL(x_jstar), &one, &betaZero, REAL(x_cov_vec) ,&one FCONE);
 		// cov - xx* cov
 		F77_CALL(dger)(&N, &N,  &increment_covpenalty_minus, REAL(x_jstar), &one,  REAL(x_cov_vec), &one, REAL(Bt), &N);
 		
@@ -1133,7 +1143,8 @@ SEXP DFMODIFIED(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_
 		// cov * r
 		
 		//F77_CALL(dsymv)( &UPPER, &q_N, &alphaOne, REAL(Bt),  &q_N, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one);
-		F77_CALL(dgemv)( &TRANST, &q_N, &q_N, &alphaOne, REAL(Bt),  &q_N, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one);
+		F77_CALL(dgemv)( "T", &q_N, &q_N, &alphaOne, REAL(Bt),  &q_N, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one FCONE);
+		//F77_CALL(dgemv)( &TRANST, &q_N, &q_N, &alphaOne, REAL(Bt),  &q_N, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one FCONE);
 		// Bt - r(cov*r)^T
 		F77_CALL(dger)(&q_N, &q_N,  &increment_covpenalty_minus, REAL(r_jstar), &one,  REAL(r_cov_vec), &one, REAL(Bt), &q_N);
 		//	          // rr* (I-cov)
@@ -1279,7 +1290,8 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 		//つじつまがあうよう行列作成
 		
 		// cov * r
-		F77_CALL(dgemv)( &TRANST, &q_N_adj, &q_N_adj, &alphaOne, REAL(Bt0),  &q_N_adj, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one);
+		//F77_CALL(dgemv)( &TRANST, &q_N_adj, &q_N_adj, &alphaOne, REAL(Bt0),  &q_N_adj, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one FCONE);
+		F77_CALL(dgemv)( "T", &q_N_adj, &q_N_adj, &alphaOne, REAL(Bt0),  &q_N_adj, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one FCONE);
 		// Bt - r(cov*r)^T
 		F77_CALL(dger)(&q_N_adj, &q_N_adj,  &increment_covpenalty_minus, REAL(r_jstar), &one,  REAL(r_cov_vec), &one, REAL(Bt0), &q_N_adj);
 		

@@ -1,5 +1,5 @@
-734934fcde25c180a7d977e5c8e792a4 *DESCRIPTION
-8e965fc94467d5bda98ae42eb5416db1 *NAMESPACE
+2f2a85f4bb77ef6f4e65aaa6f0644279 *DESCRIPTION
+aaa98889bb174cca07f8dd4f8babd84e *NAMESPACE
 803b7ded6ac11e4bdcdddfbbef66436a *R/aicc.dfgps.R
 52894f565e1b2c9b2b51694375c861ec *R/bic.dfgps.R
 747921251343894b7adc62c6a06aece0 *R/coef.dfgps.R
@@ -15,9 +15,9 @@ e7e4aebbaf9d1e5853726cbac10078b1 *R/coefmat.dfgps.R
 3586221cd9bd84f9c50d5ced66237e6e *R/predict.msgps.R
 55a4bad36b964811d408a61064bce3c4 *R/print.msgps.R
 13e2004052805702228c2b44556a04b0 *R/summary.msgps.R
-bc73bb296a52605fb3f132f5f7ae5c26 *man/msgps.Rd
+8d05e06b39af6e21a827704bd223e195 *man/msgps.Rd
 5c79010886780c900eb134626617152b *man/plot.msgps.Rd
 929a656f054ba0061ec1c354064a2a89 *man/predict.msgps.Rd
 6cba455740ea393958b7cc44d1e199be *man/summary.msgps.Rd
-027eb9adde1ed1e2dbce573733aba261 *src/GPS_v3.2.c
+2c015ef68cddbca7e4314f101f543625 *src/GPS_v3.2.c
 2a6f9e9e044a78154d3cfda5936d6f48 *src/Makevars

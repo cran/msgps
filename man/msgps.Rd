@@ -8,7 +8,7 @@
 \alias{print.msgps}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-msgps (Model Selection Criteria via Generalized Path Seeking)
+msgps (Degrees of Freedom of Elastic Net, Adaptive Lasso and Generalized Elastic Net)
 }
 \description{
 This package computes the degrees of freedom of the lasso, elastic net, generalized elastic net and adaptive lasso based on the generalized path seeking algorithm.  The optimal model can be selected by model selection criteria including Mallows' Cp, bias-corrected AIC (AICc), generalized cross validation (GCV) and BIC.
