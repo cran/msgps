@@ -57,8 +57,8 @@ char UPPER = 'U';
 
 
 // GPS
-// “ü—ÍFƒf[ƒ^(y,X)Cstep•idelta_tjCƒXƒeƒbƒv”iSTEPjC
-// o—ÍFŒW”‚Ì„’è’ls—ñ(betahat_matrix)C©—R“xƒxƒNƒgƒ‹idf_zouj
+// å…¥åŠ›ï¼šãƒ‡ãƒ¼ã‚¿(y,X)ï¼Œstepå¹…ï¼ˆdelta_tï¼‰ï¼Œã‚¹ãƒ†ãƒƒãƒ—æ•°ï¼ˆSTEPï¼‰ï¼Œ
+// å‡ºåŠ›ï¼šä¿‚æ•°ã®æ¨å®šå€¤è¡Œåˆ—(betahat_matrix)ï¼Œè‡ªç”±åº¦ãƒ™ã‚¯ãƒˆãƒ«ï¼ˆdf_zouï¼‰
 SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_para, SEXP ex_STEP, SEXP ex_pmax, SEXP ex_weight,SEXP ex_standardize_vec)
 {
 	int p = INTEGER(GET_DIM(ex_X))[1];
@@ -151,11 +151,11 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 	PROTECT(ans = allocVector(VECSXP, 8)); 
 
 
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	
 	
 	for( i=0; i<p; i++){
-		REAL(P_t)[i] = 1.0; //lasso‚Æ‚µ‚Äİ’è
+		REAL(P_t)[i] = 1.0; //lassoã¨ã—ã¦è¨­å®š
 		REAL(beta_vec)[i] = 0.0;
 		REAL(g_t)[i] = 0.0;
 		REAL(Lambda_t)[i] = 0.0;
@@ -170,7 +170,7 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 	}
 
 
-		//p_t‚Ì‰Šú’l‚ğ—^‚¦‚é
+		//p_tã®åˆæœŸå€¤ã‚’ä¸ãˆã‚‹
 		if(penalty_type_int == 0){ //enet
 			for( i=0; i<p; i++){
 				REAL(P_t)[i] = REAL(ex_para)[0] * fabs(REAL(beta_vec)[i]) + (1.0 - REAL(ex_para)[0]); 
@@ -201,7 +201,7 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		REAL(tuning_stand)[i]=0.0;
 	}          
 	
-	//generalized elastic net‚Ìtuning‚Ì‰Šú’l
+	//generalized elastic netã®tuningã®åˆæœŸå€¤
 	if(penalty_type_int == 1){ //genet
 		REAL(tuning)[0] = -log(REAL(ex_para)[0]);
 		REAL(tuning_stand)[0] = -log(REAL(ex_para)[0]);
@@ -219,20 +219,20 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		REAL(XTXNA_adj)[i] = 0.0;
 	}
 	
-	//RSS‚ÌŒvZ
+	//RSSã®è¨ˆç®—
 	REAL(RSS_vec)[0] = dnrm2_(&N,REAL(ex_y),&one);
 	REAL(RSS_vec)[0] = REAL(RSS_vec)[0]*REAL(RSS_vec)[0];
 	
 	
-	//g_t‚Ì’è‹`
+	//g_tã®å®šç¾©
 	F77_CALL(dgemv)("T", &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	
-	//jstar‚Ì‰Šú’l
+	//jstarã®åˆæœŸå€¤
 	jstar=0;
 	sign_gt_jstar=1.0;
 	
-	//jsort‚Ì‰Šú’l
+	//jsortã®åˆæœŸå€¤
 	jsort=0;
 	
 	
@@ -241,11 +241,11 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 	//////////////////
 	for( step0=1; step0<STEP+1; step0++){
 		
-		//g_t <- 2/N * t(X) %*% (y - X %*% beta_t )‚ğŒvZ
+		//g_t <- 2/N * t(X) %*% (y - X %*% beta_t )ã‚’è¨ˆç®—
 		//daxpy_(&TRANSN, &N, &p, &alphaminusOne, REAL(ex_X), &N, REAL(beta_vec), &one, &betaOne, REAL(g_t0), &one);
 		//dgemv_(&TRANSN, &N, &p, &alphaminusOne, REAL(ex_X), &N, REAL(beta_vec), &one, &betaOne, REAL(g_t0), &one);
 
-		//p_t‚ÌŒvZ
+		//p_tã®è¨ˆç®—
 		if(penalty_type_int == 0 && REAL(ex_para)[0] != 0.0){ //enet
 			REAL(P_t)[jstar] = REAL(ex_para)[0] * fabs(REAL(beta_vec)[jstar]) + (1.0 - REAL(ex_para)[0]); 
 		}
@@ -331,11 +331,11 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		
         INTEGER(betahat_index_vec)[step0] = (jstar+1) * sign_gt_jstar_int;
 		
-		//cov_penalty‚Ì‚½‚ß‚ÌŒW”ŒvZ
+		//cov_penaltyã®ãŸã‚ã®ä¿‚æ•°è¨ˆç®—
 		REAL(increment_covpenalty_vec_power)[step0] = 1.0 /  REAL(absg_t)[jstar];
 		
 		
-		//g_t0‚ğy-Xbeta‚Æ’è‹`
+		//g_t0ã‚’y-Xbetaã¨å®šç¾©
 		//g_t0=g_t0 - delta_beta*x[jstar]*sign
 		for( i=0; i<N; i++){
 			REAL(x_jstar)[i] = REAL(ex_X)[i +jstar*N];
@@ -345,7 +345,7 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		REAL(RSS_vec)[step0] = dnrm2_(&N,REAL(g_t0),&one);
 		REAL(RSS_vec)[step0] = REAL(RSS_vec)[step0]*REAL(RSS_vec)[step0];		
 		
-		//tuning parameter‚ÌŒvZ
+		//tuning parameterã®è¨ˆç®—
 		if(penalty_type_int == 0){ //enet
 			temp = REAL(ex_para)[0] * (REAL(beta_vec)[jstar]*REAL(beta_vec)[jstar] - beta_jstar_previous*beta_jstar_previous) / 2.0 + (1.0 - REAL(ex_para)[0]) * ( fabs(REAL(beta_vec)[jstar]) - fabs(beta_jstar_previous) ); 
 		}
@@ -361,21 +361,21 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 		REAL(tuning)[step0] = REAL(tuning)[step0-1] + temp; 
 		REAL(tuning_stand)[step0] = REAL(tuning_stand)[step0-1] + REAL(ex_standardize_vec)[jstar] * temp; 
 
-		//df‚ª‘Ã“–‚©check!
+		//dfãŒå¦¥å½“ã‹check!
 		beta_vecminus2_flag = 0;
 		//beta_vecminus2_index = step0-1;
 		//if(fabs(REAL(df_vec)[step0] - REAL(df_vec)[step0-1]) > REAL(ex_delta_t)[0] * 100.0) beta_vecminus2_flag=1;
-		//û‘©‚µ‚Ä‚é‚Ì‚©check!
+		//åæŸã—ã¦ã‚‹ã®ã‹check!
 		check2_int = 0;
 		for( i=0; i<p; i++){
 			if(REAL(absg_t)[i] < 2.0 * REAL(ex_delta_t)[0] / (double) N) check2_int=check2_int+1;
 		}
 		if(check2_int==p) beta_vecminus2_flag=1;
 		
-		//û‘©‚µ‚Ä‚é‚Ì‚©check! ver2
+		//åæŸã—ã¦ã‚‹ã®ã‹check! ver2
 		REAL(sum_lambda_t)[step0] = F77_CALL(dasum)(&p,REAL(Lambda_t),&one);
 		//if(REAL(sum_lambda_t)[step0] < REAL(tol)[1]) beta_vecminus2_flag=1;
-		//‚³‚ç‚É‚¿‚¥‚Á‚Á‚­
+		//ã•ã‚‰ã«ã¡ã‡ã£ã£ã
 		if(step0>check_int){
 			for( i=step0-check_int; i<step0; i++){
 				if(fabs(REAL(sum_lambda_t)[step0] - REAL(sum_lambda_t)[i]) == 0.0 ){
@@ -383,7 +383,7 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 				}
 			}
 		}
-		//pmax‚É’B‚µ‚½‚Ì‚©check
+		//pmaxã«é”ã—ãŸã®ã‹check
 		if(jsort==pmax+1) beta_vecminus2_flag=1;
 		if(beta_vecminus2_flag==1) break;
 		
@@ -417,8 +417,8 @@ SEXP gps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_pa
 
 
 // CVGPS
-// “ü—ÍFƒf[ƒ^(y,X)Cstep•idelta_tjCƒXƒeƒbƒv”iSTEPjC
-// o—ÍFŒW”‚Ì„’è’ls—ñ(betahat_matrix)C©—R“xƒxƒNƒgƒ‹idf_zouj
+// å…¥åŠ›ï¼šãƒ‡ãƒ¼ã‚¿(y,X)ï¼Œstepå¹…ï¼ˆdelta_tï¼‰ï¼Œã‚¹ãƒ†ãƒƒãƒ—æ•°ï¼ˆSTEPï¼‰ï¼Œ
+// å‡ºåŠ›ï¼šä¿‚æ•°ã®æ¨å®šå€¤è¡Œåˆ—(betahat_matrix)ï¼Œè‡ªç”±åº¦ãƒ™ã‚¯ãƒˆãƒ«ï¼ˆdf_zouï¼‰
 SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_para, SEXP ex_STEP,  SEXP ex_pmax, SEXP ex_weight, SEXP ex_X_test, SEXP ex_y_test, SEXP ex_standardize_vec)
 {
 	int p = INTEGER(GET_DIM(ex_X))[1];
@@ -523,11 +523,11 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 	
 	
 	
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	
 	
 	for( i=0; i<p; i++){
-		REAL(P_t)[i] = 1.0;  //lasso‚Æ‚µ‚Äİ’è
+		REAL(P_t)[i] = 1.0;  //lassoã¨ã—ã¦è¨­å®š
 		REAL(beta_vec)[i] = 0.0;
 		REAL(g_t)[i] = 0.0;
 		REAL(Lambda_t)[i] = 0.0;
@@ -541,7 +541,7 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 		
 	}
 	
-//alasso‚ÌP_t‚ğ‚ ‚ç‚©‚¶‚ßŒvZiŒvZŠÔ’Zkj
+//alassoã®P_tã‚’ã‚ã‚‰ã‹ã˜ã‚è¨ˆç®—ï¼ˆè¨ˆç®—æ™‚é–“çŸ­ç¸®ï¼‰
 	if(penalty_type_int == 2){ //alasso
 		for( i=0; i<p; i++){
 			REAL(P_t)[i] = REAL(ex_weight)[i]; 
@@ -579,21 +579,21 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 		REAL(XTXNA_adj)[i] = 0.0;
 	}
 	
-	//RSS‚ÌŒvZ
+	//RSSã®è¨ˆç®—
 	REAL(RSS_vec)[0] = dnrm2_(&N,REAL(ex_y),&one);
 	REAL(RSS_vec)[0] = REAL(RSS_vec)[0]*REAL(RSS_vec)[0];
 	REAL(RSS_vec_test)[0] = dnrm2_(&Ntest,REAL(ex_y_test),&one);
 	REAL(RSS_vec_test)[0] = REAL(RSS_vec_test)[0]*REAL(RSS_vec_test)[0];
 	
-	//g_t‚Ì’è‹`
+	//g_tã®å®šç¾©
 	//F77_CALL(dgemv)(&TRANST, &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	F77_CALL(dgemv)("T", &N, &p, &alphaN2, REAL(ex_X), &N, REAL(ex_y), &one, &betaZero, REAL(g_t), &one FCONE);
 	
-	//jstar‚Ì‰Šú’l
+	//jstarã®åˆæœŸå€¤
 	jstar=0;
 	sign_gt_jstar=1.0;
 	
-	//jsort‚Ì‰Šú’l
+	//jsortã®åˆæœŸå€¤
 	jsort=0;
 	
 	
@@ -602,7 +602,7 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 	//////////////////
 	for( step0=1; step0<STEP+1; step0++){
 		
-		//p_t‚ÌŒvZ
+		//p_tã®è¨ˆç®—
 		if(penalty_type_int == 0 && REAL(ex_para)[0] != 0.0){ //enet
 			for( i=0; i<p; i++){
 				REAL(P_t)[i] = REAL(ex_para)[0] * fabs(REAL(beta_vec)[i]) + (1.0 - REAL(ex_para)[0]); 
@@ -623,7 +623,7 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 
 
 		
-		//g_t <- 2/N * t(X) %*% (y - X %*% beta_t )‚ğŒvZ
+		//g_t <- 2/N * t(X) %*% (y - X %*% beta_t )ã‚’è¨ˆç®—
 		//daxpy_(&TRANSN, &N, &p, &alphaminusOne, REAL(ex_X), &N, REAL(beta_vec), &one, &betaOne, REAL(g_t0), &one);
 		//dgemv_(&TRANSN, &N, &p, &alphaminusOne, REAL(ex_X), &N, REAL(beta_vec), &one, &betaOne, REAL(g_t0), &one);
 		alphabetaminusN2 = -1.0 * alphaN2 * REAL(ex_delta_t)[0] * sign_gt_jstar;
@@ -693,10 +693,10 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 		
         INTEGER(betahat_index_vec)[step0] = (jstar+1) * sign_gt_jstar_int;
 		
-		//cov_penalty‚Ì‚½‚ß‚ÌŒW”ŒvZ
+		//cov_penaltyã®ãŸã‚ã®ä¿‚æ•°è¨ˆç®—
 		REAL(increment_covpenalty_vec)[step0] = 2.0 * REAL(ex_delta_t)[0] / ( (double) N * fabs(REAL(g_t)[jstar]) );
 		
-		//g_t0‚ğy-Xbeta‚Æ’è‹`
+		//g_t0ã‚’y-Xbetaã¨å®šç¾©
 		//g_t0=g_t0 - delta_beta*x[jstar]*sign
 		for( i=0; i<N; i++){
 			REAL(x_jstar)[i] = REAL(ex_X)[i +jstar*N];
@@ -716,7 +716,7 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 		
 		
 		
-		//tuning parameter‚ÌŒvZ
+		//tuning parameterã®è¨ˆç®—
 		if(penalty_type_int == 0){ //enet
 			for( i=0; i<p; i++){
 				temp = REAL(ex_para)[0] * REAL(beta_vec)[i]*REAL(beta_vec)[i] / 2.0 + (1.0 - REAL(ex_para)[0])*fabs(REAL(beta_vec)[i]); 
@@ -750,21 +750,21 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 			
 
 
-		//df‚ª‘Ã“–‚©check!
+		//dfãŒå¦¥å½“ã‹check!
 		beta_vecminus2_flag = 0;
 		//beta_vecminus2_index = step0-1;
 		//if(fabs(REAL(df_vec)[step0] - REAL(df_vec)[step0-1]) > REAL(ex_delta_t)[0] * 100.0) beta_vecminus2_flag=1;
-		//û‘©‚µ‚Ä‚é‚Ì‚©check!
+		//åæŸã—ã¦ã‚‹ã®ã‹check!
 		check2_int = 0;
 		for( i=0; i<p; i++){
 			if(REAL(absg_t)[i] < 2.0 * REAL(ex_delta_t)[0] / (double) N) check2_int=check2_int+1;
 		}
 		if(check2_int==p) beta_vecminus2_flag=1;
 		
-		//û‘©‚µ‚Ä‚é‚Ì‚©check! ver2
+		//åæŸã—ã¦ã‚‹ã®ã‹check! ver2
 		REAL(sum_lambda_t)[step0] = F77_CALL(dasum)(&p,REAL(Lambda_t),&one);
 		//if(REAL(sum_lambda_t)[step0] < REAL(tol)[1]) beta_vecminus2_flag=1;
-		//‚³‚ç‚É‚¿‚¥‚Á‚Á‚­
+		//ã•ã‚‰ã«ã¡ã‡ã£ã£ã
 		if(step0>check_int){
 			for( i=step0-check_int; i<step0; i++){
 				if(fabs(REAL(sum_lambda_t)[step0] - REAL(sum_lambda_t)[i]) == 0.0 ){
@@ -772,7 +772,7 @@ SEXP cvgps(SEXP ex_X, SEXP ex_y, SEXP ex_delta_t, SEXP ex_penalty_type, SEXP ex_
 				}
 			}
 		}
-		//pmax‚É’B‚µ‚½‚Ì‚©check
+		//pmaxã«é”ã—ãŸã®ã‹check
 		if(jsort==pmax+1) beta_vecminus2_flag=1;
 		if(beta_vecminus2_flag==1) break;
 		
@@ -917,9 +917,9 @@ SEXP DFNAIVE(SEXP ex_X, SEXP ex_y, SEXP ex_betahat_index_vec, SEXP ex_STEP_adj, 
 	}	    	
 	
 	
-	//covariance penalty ‚ÌŒvZ
+	//covariance penalty ã®è¨ˆç®—
 	//\frac{\mathrm{cov}(\hat{\bm{y}}(t+\Delta t),\bm{y})}{\tau^2} =\frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2}  + \frac{2\Delta t}{N|g_{k}(t) |}  \ \bm{x}_{k} \bm{x}_{k}^T  \left\{ I- \frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2} \right\}
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	for( step0=1; step0<STEP_adj+1; step0++){
 		F77_CALL(dscal)(&N,&Zero,REAL(x_cov_vec),&one);
 		F77_CALL(dscal)(&NN,&Zero,REAL(xx_cov_matrix),&one);
@@ -944,11 +944,11 @@ SEXP DFNAIVE(SEXP ex_X, SEXP ex_y, SEXP ex_betahat_index_vec, SEXP ex_STEP_adj, 
 		// xx* (I-cov)
 		F77_CALL(dger)(&N, &N,  &increment_covpenalty, REAL(x_jstar), &one,  REAL(x_jstar), &one, REAL(xx_cov_matrix), &N);
 		
-		// cov‚ÌŒvZ
+		// covã®è¨ˆç®—
 		F77_CALL(daxpy)(&NN, &alphaOne, REAL(xx_cov_matrix),&one,REAL(cov_penalty_matrix),&one);
 		
 		
-		//df‚ÌŒvZ
+		//dfã®è¨ˆç®—
 		//REAL(df_vec)[step0] = REAL(df_vec)[step0-1];
 		for( i=0; i<N; i++){
 			REAL(df_vec)[step0] = REAL(df_vec)[step0] + REAL(cov_penalty_matrix)[i*N + i];
@@ -1016,9 +1016,9 @@ SEXP DFNAIVE2(SEXP ex_X_selected, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP
 	}
 	
 	
-	//covariance penalty ‚ÌŒvZ
+	//covariance penalty ã®è¨ˆç®—
 	//\frac{\mathrm{cov}(\hat{\bm{y}}(t+\Delta t),\bm{y})}{\tau^2} =\frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2}  + \frac{2\Delta t}{N|g_{k}(t) |}  \ \bm{x}_{k} \bm{x}_{k}^T  \left\{ I- \frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2} \right\}
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	for( step0=1; step0<STEP_adj+1; step0++){
 		F77_CALL(dscal)(&N,&Zero,REAL(x_cov_vec),&one);
 		F77_CALL(dscal)(&NN,&Zero,REAL(xx_cov_matrix),&one);
@@ -1043,7 +1043,7 @@ SEXP DFNAIVE2(SEXP ex_X_selected, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP
 		F77_CALL(dger)(&N, &N,  &increment_covpenalty_minus, REAL(x_jstar), &one,  REAL(x_cov_vec), &one, REAL(Bt), &N);
 		
 		
-		//df‚ÌŒvZ
+		//dfã®è¨ˆç®—
 		//REAL(df_vec)[step0] = REAL(df_vec)[step0-1];
 		for( i=0; i<N; i++){
 			REAL(df_vec)[step0] = REAL(df_vec)[step0] - REAL(Bt)[i*N + i];
@@ -1094,9 +1094,9 @@ SEXP DFMODIFIED(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_
 	
 	
 	
-	//covariance penalty ‚ÌŒvZ
+	//covariance penalty ã®è¨ˆç®—
 	//\frac{\mathrm{cov}(\hat{\bm{y}}(t+\Delta t),\bm{y})}{\tau^2} =\frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2}  + \frac{2\Delta t}{N|g_{k}(t) |}  \ \bm{x}_{k} \bm{x}_{k}^T  \left\{ I- \frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2} \right\}
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	
 	
 	
@@ -1150,11 +1150,11 @@ SEXP DFMODIFIED(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex_
 		//	          // rr* (I-cov)
 		//	          dger_(&q_N, &q_N,  &increment_covpenalty, REAL(r_jstar), &one,  REAL(r_jstar), &one, REAL(rr_cov_matrix), &q_N);
 		//	          
-		//			  // cov‚ÌŒvZ
+		//			  // covã®è¨ˆç®—
 		//			  daxpy_(&q_Nq_N, &alphaOne, REAL(rr_cov_matrix),&one,REAL(Bt),&one);
 		
 		
-		//df‚ÌŒvZ
+		//dfã®è¨ˆç®—
 		//REAL(df_vec)[step0] = REAL(df_vec)[step0-1];
 		for( i=0; i<q_N; i++){
 			REAL(df_vec)[step0] = REAL(df_vec)[step0] - REAL(Bt)[i*q_N + i];
@@ -1198,7 +1198,7 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 	double increment_covpenalty_minus;
 	
 	SEXP Bt;
-	SEXP Bt0; //‚¯‚¿‚ÈŒvZ‚ğs‚¤‚½‚ß‚Ìs—ñ
+	SEXP Bt0; //ã‘ã¡ãªè¨ˆç®—ã‚’è¡Œã†ãŸã‚ã®è¡Œåˆ—
 	SEXP rr_matrix;
     SEXP rr_cov_matrix;
     SEXP r_cov_vec;
@@ -1215,9 +1215,9 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 	
 	
 	
-	//covariance penalty ‚ÌŒvZ
+	//covariance penalty ã®è¨ˆç®—
 	//\frac{\mathrm{cov}(\hat{\bm{y}}(t+\Delta t),\bm{y})}{\tau^2} =\frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2}  + \frac{2\Delta t}{N|g_{k}(t) |}  \ \bm{x}_{k} \bm{x}_{k}^T  \left\{ I- \frac{\mathrm{cov}(\hat{\bm{y}}(t) ,\bm{y})}{\tau^2} \right\}
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	
 	
 	
@@ -1287,7 +1287,7 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 		//	}
 		
 		
-		//‚Â‚¶‚Â‚Ü‚ª‚ ‚¤‚æ‚¤s—ñì¬
+		//ã¤ã˜ã¤ã¾ãŒã‚ã†ã‚ˆã†è¡Œåˆ—ä½œæˆ
 		
 		// cov * r
 		//F77_CALL(dgemv)( &TRANST, &q_N_adj, &q_N_adj, &alphaOne, REAL(Bt0),  &q_N_adj, REAL(r_jstar), &one, &betaZero, REAL(r_cov_vec) ,&one FCONE);
@@ -1298,7 +1298,7 @@ SEXP DFMODIFIED2(SEXP ex_qr_X, SEXP ex_y, SEXP ex_betahat_index_vec_adj, SEXP ex
 		
 		
 		
-		//df‚ÌŒvZ
+		//dfã®è¨ˆç®—
 		//REAL(df_vec)[step0] = REAL(df_vec)[step0-1];
 		for( i=0; i<q_N_adj; i++){
 			REAL(df_vec)[step0] = REAL(df_vec)[step0] - REAL(Bt0)[i*q_N_adj + i];

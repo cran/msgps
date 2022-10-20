@@ -1,4 +1,4 @@
-2f2a85f4bb77ef6f4e65aaa6f0644279 *DESCRIPTION
+07a9564ed4cef4bbb05a3e294edc396b *DESCRIPTION
 aaa98889bb174cca07f8dd4f8babd84e *NAMESPACE
 803b7ded6ac11e4bdcdddfbbef66436a *R/aicc.dfgps.R
 52894f565e1b2c9b2b51694375c861ec *R/bic.dfgps.R
@@ -19,5 +19,6 @@ e7e4aebbaf9d1e5853726cbac10078b1 *R/coefmat.dfgps.R
 5c79010886780c900eb134626617152b *man/plot.msgps.Rd
 929a656f054ba0061ec1c354064a2a89 *man/predict.msgps.Rd
 6cba455740ea393958b7cc44d1e199be *man/summary.msgps.Rd
-2c015ef68cddbca7e4314f101f543625 *src/GPS_v3.2.c
+ed3a71039c7ef1a40182243ffbbdc303 *src/GPS_v3.2.c
 2a6f9e9e044a78154d3cfda5936d6f48 *src/Makevars
+7c22b1b500cab25872924e218f1645f5 *src/registerDynamicSymbol.c
